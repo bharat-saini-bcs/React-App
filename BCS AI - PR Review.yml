@@ -1,0 +1,36 @@
+name: BCS AI - PR Review
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  pr-review:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install requests python-dotenv PyGithub
+
+    - name: Run PR review script
+      env:
+        GIT_TOKEN: ${{ secrets.GIT_TOKEN }}
+        REPOSITORY_NAME: ${{ github.repository }}
+
+        COMMAND: '["review","syntax_checker","code_summarization"]'
+        AZURE_OPENAI_ENDPOINT: ${{ secrets.AZURE_OPENAI_ENDPOINT }}
+        AZURE_OPENAI_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
+        
+      run: |
+        git clone ${{ secrets.CLONE_APP }}
+        python bcsai-github-pr-reviewer/github_pr_analyzer.py
